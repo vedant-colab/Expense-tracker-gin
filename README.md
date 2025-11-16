@@ -56,26 +56,5 @@ The code is organized in a way that makes it easy to extend the project with new
 
 ---
 
-## 🐳 Running Postgres & Redis with Docker
-
-### PostgreSQL
-
-```sh
-docker run --name exp-postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=expense_tracker \
-  -p 5432:5432 -d postgres
-```
-
-Setup Instructions
-Install dependencies:
-go mod tidy
-
-Copy the example config file:
-cp config.example.yaml config.yaml
-
-Start the server (with Air):
-air
-
 
 Server will start on the port defined in config.yaml.
