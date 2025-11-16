@@ -22,11 +22,13 @@ This project focuses on clean code structure, modular design, and practical feat
 ---
 
 ## 📁 Project Structure
-backend///
+```
+backend/
 │
-├── cmd/server/ # Application entrypoint
+├── cmd/
+│ └── server/ # Application entrypoint
 │
-├── internal///
+├── internal/
 │ ├── app/ # Dependency wiring
 │ ├── cache/ # Redis client
 │ ├── config/ # Config loader (YAML + env overrides)
@@ -42,7 +44,7 @@ backend///
 │
 ├── config.example.yaml
 └── README.md
-
+```
 
 The code is organized in a way that makes it easy to extend the project with new modules (expenses, accounts, categories, etc.).
 
