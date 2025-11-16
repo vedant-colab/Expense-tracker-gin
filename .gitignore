@@ -1,0 +1,132 @@
+#############################
+# Go Build Artifacts
+#############################
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Build output folders
+bin/
+build/
+dist/
+tmp/
+out/
+
+# Go coverage files
+*.cover
+*.cov
+coverage.txt
+
+# Go workspace files
+go.work
+go.work.sum
+
+
+#############################
+# Dependency / Modules
+#############################
+
+# Go modules cache (should not commit)
+pkg/mod/
+vendor/
+
+# Local replace directives
+replace/
+
+
+#############################
+# Logs
+#############################
+
+*.log
+logs/
+*.out
+
+
+#############################
+# Config & Secrets
+#############################
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# YAML config (keep only safe example versions)
+*.yaml
+!config.example.yaml
+
+
+#############################
+# Redis, Postgres, DB Dumps
+#############################
+
+dump.rdb
+*.sql
+*.sqlite
+*.db
+
+#############################
+# Docker
+#############################
+
+# Docker artifacts
+docker-compose.override.yml
+.docker/
+*.pid
+
+
+#############################
+# Gin / Air Hot Reload
+#############################
+
+.air/
+.air.toml
+tmp/
+tmp/**/*
+
+
+#############################
+# IDE Specific
+#############################
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# GoLand / JetBrains
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+#############################
+# Testing Artifacts
+#############################
+
+*.swp
+*.swo
+*.tmp
+coverage/
+node_modules/   # if you add frontend later
+
+
+#############################
+# Project-specific
+#############################
+
+# Compiled authentication keys
+jwt-key.pem
+jwt-key.pub
+
+# Local data
+local/
+uploads/
