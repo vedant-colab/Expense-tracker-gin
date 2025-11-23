@@ -18,8 +18,6 @@ import (
 
 func Run(cfg config.Config) {
 	router := gin.Default()
-	database.Connect(cfg)
-	cache.Connect(cfg)
 	appRouter.RegisterRoutes(router, cfg)
 
 	addr := ":" + strconv.Itoa(cfg.Server.Port)

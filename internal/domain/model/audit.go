@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type AuditLog struct {
 	ID        string    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
@@ -10,4 +15,10 @@ type AuditLog struct {
 	EntityID  string    `gorm:"type:uuid" json:"entity_id"`
 	Meta      string    `gorm:"type:jsonb" json:"meta"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+func (a *AuditLog) BeforeCreate(tx *gorm.DB) error {
+	a.ID = uuid.NewString()
+	a.CreatedAt = time.Now()
+	return nil
 }

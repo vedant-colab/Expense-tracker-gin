@@ -1,12 +1,23 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type Account struct {
-	ID        string    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-	UserID    string    `gorm:"type:uuid;not null" json:"user_id"`
-	Name      string    `gorm:"type:varchar(50);not null" json:"name"`
-	Type      string    `gorm:"type:varchar(20);not null" json:"type"` // cash, bank, wallet, etc.
-	Balance   float64   `gorm:"type:numeric" json:"balance"`
+	ID        string    `gorm:"primaryKey" json:"id"`
+	UserID    string    `json:"user_id" gorm:"index"`
+	Name      string    `json:"name"`
+	Type      string    `json:"type"`
+	Balance   float64   `json:"balance"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+func (a *Account) BeforeCreate(tx *gorm.DB) error {
+	a.ID = uuid.NewString()
+	a.CreatedAt = time.Now()
+	return nil
 }

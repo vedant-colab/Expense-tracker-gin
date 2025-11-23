@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type Expense struct {
 	ID        string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
@@ -13,4 +18,10 @@ type Expense struct {
 	Date     time.Time `json:"date"`
 
 	CreatedAt time.Time `json:"created_at"`
+}
+
+func (e *Expense) BeforeCreate(tx *gorm.DB) error {
+	e.ID = uuid.NewString()
+	e.CreatedAt = time.Now()
+	return nil
 }

@@ -54,9 +54,10 @@ func checkPassword(hash string, password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
-func (s *authService) generateAccessToken(userID string) (string, error) {
+func (s *authService) generateAccessToken(userID string, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
+		"role":    role,
 		"exp":     time.Now().Add(accessTokenTTL).Unix(),
 	}
 
@@ -100,8 +101,8 @@ func (s *authService) deleteRefreshSession(ctx context.Context, userID, tokenID 
 	}
 }
 
-func (s *authService) buildAuthResponse(ctx context.Context, userID, ip, userAgent string) (*auth.AuthResponse, error) {
-	accessToken, err := s.generateAccessToken(userID)
+func (s *authService) buildAuthResponse(ctx context.Context, userID, role, ip, userAgent string) (*auth.AuthResponse, error) {
+	accessToken, err := s.generateAccessToken(userID, role)
 	if err != nil {
 		return nil, err
 	}
@@ -146,6 +147,7 @@ func (s *authService) Register(req auth.RegisterRequest, ip, userAgent string) (
 	user := &models.User{
 		Email:    req.Email,
 		Password: hashed,
+		Role:     req.Role,
 	}
 
 	if err := s.repo.Create(user); err != nil {
@@ -155,7 +157,7 @@ func (s *authService) Register(req auth.RegisterRequest, ip, userAgent string) (
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	return s.buildAuthResponse(ctx, user.ID, ip, userAgent)
+	return s.buildAuthResponse(ctx, user.ID, user.Role, ip, userAgent)
 }
 
 func (s *authService) Login(req auth.LoginRequest, ip, userAgent string) (*auth.AuthResponse, error) {
@@ -171,7 +173,7 @@ func (s *authService) Login(req auth.LoginRequest, ip, userAgent string) (*auth.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	return s.buildAuthResponse(ctx, user.ID, ip, userAgent)
+	return s.buildAuthResponse(ctx, user.ID, user.Role, ip, userAgent)
 }
 
 func (s *authService) Refresh(req auth.RefreshRequest, ip, userAgent string) (*auth.AuthResponse, error) {
@@ -196,6 +198,11 @@ func (s *authService) Refresh(req auth.RefreshRequest, ip, userAgent string) (*a
 		return nil, errors.New("invalid refresh token user")
 	}
 
+	role, ok := claims["role"].(string)
+	if !ok {
+		return nil, errors.New("invalid refresh token user")
+	}
+
 	tokenID, ok := claims["jti"].(string)
 	if !ok {
 		return nil, errors.New("invalid refresh token id")
@@ -212,9 +219,6 @@ func (s *authService) Refresh(req auth.RefreshRequest, ip, userAgent string) (*a
 	key := "refresh:" + userID + ":" + tokenID
 	val, err := cache.Client.Get(ctx, key).Result()
 	if err != nil {
-		// Token not found => reused / revoked / expired
-		// At this point you might choose to revoke all sessions for this user
-		// but for now just treat as invalid.
 		return nil, errors.New("refresh token expired or revoked")
 	}
 
@@ -225,14 +229,11 @@ func (s *authService) Refresh(req auth.RefreshRequest, ip, userAgent string) (*a
 
 	// 3. Check IP + User-Agent match
 	if sess.IP != ip || sess.UserAgent != userAgent {
-		// Optionally: delete all sessions for userID to force logout everywhere
-		// scanKey := "refresh:" + userID + ":*"
-		// (left as future enhancement)
 		return nil, errors.New("device mismatch")
 	}
 
 	// 4. Rotate token: delete old, issue new
 	s.deleteRefreshSession(ctx, userID, tokenID)
 
-	return s.buildAuthResponse(ctx, userID, ip, userAgent)
+	return s.buildAuthResponse(ctx, userID, role, ip, userAgent)
 }
